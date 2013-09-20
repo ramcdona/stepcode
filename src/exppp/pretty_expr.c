@@ -79,6 +79,7 @@ void EXPR__out( Expression e, int paren, unsigned int previous_op ) {
         case entity_:
         case identifier_:
         case attribute_:
+        case qualified_attribute_:
         case enumeration_:
             wrap( "%s", e->symbol.name );
             break;
@@ -206,6 +207,7 @@ void EXPRop__out( struct Op_Subexpression * oe, int paren, unsigned int previous
             raw( "]" );
             break;
         default:
+            fprintf( stderr, "%s:%d ERROR: unknown op-expression %d\n", __FILE__, __LINE__, oe->op_code );
             wrap( "(* unknown op-expression *)" );
     }
 }

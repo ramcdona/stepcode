@@ -316,9 +316,6 @@ void EXP_resolve( Expression expr, Scope scope, Type typecheck ) {
     Type t;
     bool func_args_checked = false;
 
-    /*  if (expr == EXPRESSION_NULL)
-            return;
-    */
     switch( expr->type->u.type->body->type ) {
         case funcall_:
             /* functions with no arguments get handled elsewhere */
@@ -515,6 +512,7 @@ void EXP_resolve( Expression expr, Scope scope, Type typecheck ) {
                     break;
                 default:
                     fprintf( stderr, "ERROR: unexpected type in EXPresolve.\n" );
+                    abort();
                     break;
             }
             break;
@@ -577,12 +575,14 @@ void EXP_resolve( Expression expr, Scope scope, Type typecheck ) {
             expr->return_type = expr->type;
             resolved_all( expr );
             break;
+        case qualified_attribute_:
         case attribute_:
             expr->return_type = expr->type;
             resolved_all( expr );
             break;
         default:
             fprintf( stderr, "ERROR: unexpected type in EXPresolve.\n" );
+            abort();
     }
 }
 
@@ -999,17 +999,32 @@ void ENTITYresolve_expressions( Entity e ) {
                 attr->name->symbol.name = sname;
             }
         } else {
+            bool qualified = ( attr->name->type->u.type->body->type == qualified_attribute_ );
+            bool found = false;
             /* new attribute declaration */
             LISTdo_n( e->u.entity->supertypes, supr, Entity, b ) {
                     if( ENTITYget_named_attribute( supr,
                                                 attr->name->symbol.name ) ) {
-                        ERRORreport_with_symbol( ERROR_overloaded_attribute,
-                                                &attr->name->symbol,
-                                                attr->name->symbol.name,
-                                                supr->symbol.name );
-                        resolve_failed( attr->name );
+                        found = true;
+                        if( !qualified ) {
+                            ERRORreport_with_symbol( ERROR_overloaded_attribute,
+                                                    &attr->name->symbol,
+                                                    attr->name->symbol.name,
+                                                    supr->symbol.name );
+                            resolve_failed( attr->name );
+                        }
                     }
             } LISTod;
+            if( qualified ) {
+                if( ( !found && attr->name->u.qualified_attr->entity ) || ( found && !(attr->name->u.qualified_attr->entity) ) ) {
+                    /* the former catches qualified attrs (i.e. SELF\...) that aren't found in supertypes,
+                     * while the latter catches simple attrs that *are* found in supertypes
+                     */
+                    ERRORreport_with_symbol( ERROR_inverse_bad_attribute, &attr->name->symbol,
+                                         attr->name->symbol.name, e->symbol.name );
+                    resolve_failed( attr->name );
+                }
+            }
         }
         VARresolve_expressions( attr, e );
         status |= is_resolve_failed( attr->name );
@@ -1309,7 +1324,7 @@ static void ENTITYresolve_subtypes( Entity e ) {
 
 void ENTITYresolve_types( Entity e ) {
     int i;
-    Qualified_Attr * aref;
+    Qualified_Attr aref;
     Variable attr;
     int failed = 0;
 
@@ -1341,7 +1356,7 @@ void ENTITYresolve_types( Entity e ) {
             if( i == 1 ) {
                 continue;
             }
-            aref = ( Qualified_Attr * )reflink->data;
+            aref = ( Qualified_Attr )reflink->data;
 
             attr = ENTITYresolve_attr_ref( e, aref->entity, aref->attribute );
             if( !attr ) {

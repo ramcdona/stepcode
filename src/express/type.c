@@ -147,6 +147,7 @@ Type Type_String_Encoded;
 Type Type_Logical;
 Type Type_Set;
 Type Type_Attribute;
+Type Type_Qualified_Attribute;
 Type Type_Entity;
 Type Type_Funcall;
 Type Type_Generic;
@@ -393,6 +394,9 @@ void TYPEinitialize() {
 
     Type_Attribute = TYPEcreate( attribute_ );
     Type_Attribute->u.type->body->flags.shared = 1;
+
+    Type_Qualified_Attribute = TYPEcreate( qualified_attribute_ );
+    Type_Qualified_Attribute->u.type->body->flags.shared = 1;
 
     Type_Entity = TYPEcreate( entity_ );
     Type_Entity->u.type->body->flags.shared = 1;

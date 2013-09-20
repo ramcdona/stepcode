@@ -62,7 +62,7 @@ typedef union YYSTYPE {
     Linked_List     list;
     Logical     logical;
     Op_Code     op_code;
-    Qualified_Attr * qualified_attr;
+    Qualified_Attr qualified_attr;
     Real        rVal;
     Statement       statement;
     Symbol   *   symbol;

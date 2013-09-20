@@ -133,6 +133,10 @@ void ENTITYinverse_out( Linked_List attrs, int level ) {
         if( v->inverse_symbol ) {
             int length;
             length = strlen( v->name->symbol.name );
+            assert( v->name->type->u.type->body->type == qualified_attribute_ );
+            if( v->name->u.qualified_attr->entity ) {
+                length += strlen( "SELF\\" ) + strlen( v->name->u.qualified_attr->entity->name );
+            }
             if( length > max_indent ) {
                 max_indent = length;
             }
@@ -149,10 +153,20 @@ void ENTITYinverse_out( Linked_List attrs, int level ) {
     /* pass 2: print them */
     LISTdo( attrs, v, Variable ) {
         if( v->inverse_symbol ) {
-            /* print attribute name */
-            raw( "%*s%-*s :", level, "",
-                    max_indent, v->name->symbol.name );
-
+            assert( v->name->type->u.type->body->type == qualified_attribute_ );
+            if( v->name->u.qualified_attr->entity ) {
+                /* if true, this one has SELF\...
+                 * code in else clause would put whitespace in middle of line
+                 */
+                int remaining_indent = max_indent - ( strlen( "SELF\\" ) +
+                                                      strlen( v->name->u.qualified_attr->entity->name ) );
+                raw( "%*sSELF\\%s.", level, "", v->name->u.qualified_attr->entity->name );
+                raw( "%-*s :", remaining_indent, v->name->symbol.name );
+            } else {
+                /* print attribute name */
+                raw( "%*s%-*s :", level, "",
+                     max_indent, v->name->symbol.name );
+            }
             /* print attribute type */
             if( VARget_optional( v ) ) {
                 wrap( " OPTIONAL" );

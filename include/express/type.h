@@ -96,6 +96,7 @@ enum type_enum {
 
     identifier_,    /**< simple identifier in an expression */
     attribute_, /**< attribute reference (i.e., expr->u.variable) */
+    qualified_attribute_,
     derived_,   /**< ?*/
     funcall_,   /**< a function call and actual parameters */
 
@@ -150,7 +151,7 @@ struct TypeHead_ {
 };
 
 struct TypeBody_ {
-#if 1
+#if 0 /* this is never used according to grep */
     struct TypeHead_ * head;    /**< for debugging only */
 #endif
     enum type_enum type;        /**< bits describing this type, int, real, etc */
@@ -202,6 +203,7 @@ extern SC_EXPRESS_EXPORT Type Type_String_Encoded;
 extern SC_EXPRESS_EXPORT Type Type_Logical;
 extern SC_EXPRESS_EXPORT Type Type_Set;
 extern SC_EXPRESS_EXPORT Type Type_Attribute;
+extern SC_EXPRESS_EXPORT Type Type_Qualified_Attribute;
 extern SC_EXPRESS_EXPORT Type Type_Entity;
 extern SC_EXPRESS_EXPORT Type Type_Funcall;
 extern SC_EXPRESS_EXPORT Type Type_Generic;

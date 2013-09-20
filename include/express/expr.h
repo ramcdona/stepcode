@@ -87,7 +87,7 @@ typedef enum {
     OP_LAST /**< must be last - used only to size tables */
 } Op_Code;
 
-typedef struct Qualified_Attr   Qualified_Attr;
+typedef struct Qualified_Attr_ *  Qualified_Attr;
 typedef struct Expression_ * Expression;
 typedef Expression      Ary_Expression, One_Of_Expression, Identifier,
         Literal;
@@ -115,7 +115,7 @@ typedef Literal         Aggregate_Literal, Integer_Literal,
 
 /* expression types */
 
-struct Qualified_Attr {
+struct Qualified_Attr_ {
     struct Expression_ * complex;   /**< complex entity instance */
     Symbol * entity;
     Symbol * attribute;
@@ -161,6 +161,7 @@ union expr_union {
     struct Scope_ * entity; /**< used by subtype exp, group expr
                               * and self expr, some funcall's and any
                               * expr that results in an entity */
+    Qualified_Attr qualified_attr;
     Variable variable;  /**< attribute reference */
 };
 
@@ -213,7 +214,7 @@ extern SC_EXPRESS_EXPORT struct freelist_head QUAL_ATTR_fl;
 #define OP_destroy(x)   MEM_destroy(&OP_fl,(Freelist *)(Generic)x)
 #define QUERY_new() (struct Query_ *)MEM_new(&QUERY_fl)
 #define QUERY_destroy(x) MEM_destroy(&QUERY_fl,(Freelist *)(Generic)x)
-#define QUAL_ATTR_new() (struct Qualified_Attr *)MEM_new(&QUAL_ATTR_fl)
+#define QUAL_ATTR_new() (Qualified_Attr)MEM_new(&QUAL_ATTR_fl)
 #define QUAL_ATTR_destroy(x) MEM_destroy(&QUAL_ATTR_fl,(Freelist *)(Generic)x)
 
 #define EXPget_name(e)          ((e)->symbol.name)
