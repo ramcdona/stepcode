@@ -7,9 +7,13 @@
 #include <cstddef>
 #else
 #  if ( _MSC_VER > 1600 )
-#    define nullptr_t void*
+#    ifndef nullptr_t
+#      define nullptr_t void*
+#    endif
 #  endif
-#  define nullptr NULL
+#  ifndef nullptr
+#    define nullptr NULL
+#  endif
 #endif //HAVE_NULLPTR
 
 #endif //NULLPTR_H
