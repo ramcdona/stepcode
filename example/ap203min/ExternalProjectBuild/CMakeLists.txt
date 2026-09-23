@@ -35,6 +35,30 @@ target_link_libraries( ${PROJECT_NAME}
     ${STEPCODE_SYSTEM_LIBRARIES}
 )
 
+#####
+# Tests: run the example, and verify it has no non-system dynamic dependencies.
+
+enable_testing()
+
+add_test( NAME run_ap203min COMMAND ${PROJECT_NAME}
+	WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR} )
+
+if( APPLE )
+	find_program( STATIC_DEPS_TOOL otool )
+elseif( WIN32 )
+	get_filename_component( _cxx_dir "${CMAKE_CXX_COMPILER}" DIRECTORY )
+	get_filename_component( _linker_dir "${CMAKE_LINKER}" DIRECTORY )
+	find_program( STATIC_DEPS_TOOL dumpbin HINTS ${_cxx_dir} ${_linker_dir} )
+else()
+	find_program( STATIC_DEPS_TOOL ldd )
+endif()
+
+add_test( NAME static_deps_ap203min
+	COMMAND ${CMAKE_COMMAND}
+		-DEXE=$<TARGET_FILE:${PROJECT_NAME}>
+		-DTOOL=${STATIC_DEPS_TOOL}
+		-P ${AP203Minimum_SOURCE_DIR}/cmake/CheckStaticDeps.cmake )
+
 # Local Variables:
 # tab-width: 8
 # mode: cmake
